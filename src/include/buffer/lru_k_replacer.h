@@ -12,12 +12,14 @@
 
 #pragma once
 
+#include <iostream>
 #include <limits>
 #include <list>
+#include <memory>
 #include <mutex>  // NOLINT
+#include <queue>
 #include <unordered_map>
 #include <vector>
-
 #include "common/config.h"
 #include "common/macros.h"
 
@@ -28,7 +30,7 @@ namespace bustub {
  *
  * The LRU-k algorithm evicts a frame whose backward k-distance is maximum
  * of all frames. Backward k-distance is computed as the difference in time between
- * current timestamp and the timestamp of kth previous access.
+ * current timestamp and the timestamp of kth pre_vious access.
  *
  * A frame with less than k historical references is given
  * +inf as its backward k-distance. When multiple frames have +inf backward k-distance,
@@ -43,6 +45,24 @@ class LRUKReplacer {
    * @brief a new LRUKReplacer.
    * @param num_frames the maximum number of frames the LRUReplacer will be required to store
    */
+  struct Frame {
+    frame_id_t id_;
+    size_t num_;
+    bool flag_;
+    size_t first_record_;
+    std::queue<size_t> q_record_;
+    std::shared_ptr<Frame> pre_;
+    std::shared_ptr<Frame> nxt_;
+    explicit Frame(frame_id_t id = 0, size_t num = 1, bool flag = false, size_t firstRecord_ = 0)
+        : id_(id), num_(num), flag_(flag), first_record_(firstRecord_) {
+      q_record_.push(firstRecord_);
+      pre_ = nullptr;
+      nxt_ = nullptr;
+    }
+    auto operator<(const Frame &o) const -> bool { return id_ < o.id_; }
+    auto operator==(const Frame &o) const -> bool { return id_ == o.id_; }
+  };
+
   explicit LRUKReplacer(size_t num_frames, size_t k);
 
   DISALLOW_COPY_AND_MOVE(LRUKReplacer);
@@ -71,7 +91,7 @@ class LRUKReplacer {
    * @return true if a frame is evicted successfully, false if no frames can be evicted.
    */
   auto Evict(frame_id_t *frame_id) -> bool;
-
+  auto EvictNoLock() -> bool;
   /**
    * TODO(P1): Add implementation
    *
@@ -91,8 +111,8 @@ class LRUKReplacer {
    * @brief Toggle whether a frame is evictable or non-evictable. This function also
    * controls replacer's size. Note that size is equal to number of evictable entries.
    *
-   * If a frame was previously evictable and is to be set to non-evictable, then size should
-   * decrement. If a frame was previously non-evictable and is to be set to evictable,
+   * If a frame was pre_viously evictable and is to be set to non-evictable, then size should
+   * decrement. If a frame was pre_viously non-evictable and is to be set to evictable,
    * then size should increment.
    *
    * If frame id is invalid, throw an exception or abort the process.
@@ -131,15 +151,19 @@ class LRUKReplacer {
    * @return size_t
    */
   auto Size() -> size_t;
+  auto GetUnLruk() -> std::unordered_map<frame_id_t, std::list<Frame>::iterator> { return un_history_; }
+  auto GetUnCache() -> std::unordered_map<frame_id_t, std::list<Frame>::iterator> { return un_cache_; }
 
  private:
   // TODO(student): implement me! You can replace these member variables as you like.
   // Remove maybe_unused if you start using them.
-  [[maybe_unused]] size_t current_timestamp_{0};
-  [[maybe_unused]] size_t curr_size_{0};
-  [[maybe_unused]] size_t replacer_size_;
-  [[maybe_unused]] size_t k_;
+  size_t current_timestamp_{0};
+  size_t curr_size_{0};
+  size_t replacer_size_;
+  size_t k_;
   std::mutex latch_;
+  std::list<Frame> history_, cache_;
+  std::unordered_map<frame_id_t, std::list<Frame>::iterator> un_history_, un_cache_;
 };
 
 }  // namespace bustub
