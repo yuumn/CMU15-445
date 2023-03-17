@@ -17,7 +17,8 @@
 
 #include "buffer/buffer_pool_manager.h"
 #include "storage/index/generic_key.h"
-
+#define d(x) std::cout << "\033[32m" << #x << ":" << (x) << "\033[0m\n"
+#define de(x) std::cout << "\033[32m" << #x << ":" << (x) << "  \033[0m"
 namespace bustub {
 
 #define MappingType std::pair<KeyType, ValueType>
@@ -61,15 +62,16 @@ class BPlusTreePage {
   void SetPageId(page_id_t page_id);
 
   void SetLSN(lsn_t lsn = INVALID_LSN);
+  void CoutSize() { std::cout << "size:" << size_; }
 
  private:
   // member variable, attributes that both internal and leaf page share
-  IndexPageType page_type_ __attribute__((__unused__));
-  lsn_t lsn_ __attribute__((__unused__));
-  int size_ __attribute__((__unused__));
-  int max_size_ __attribute__((__unused__));
-  page_id_t parent_page_id_ __attribute__((__unused__));
-  page_id_t page_id_ __attribute__((__unused__));
+  IndexPageType page_type_;
+  lsn_t lsn_;
+  int size_;
+  int max_size_;
+  page_id_t parent_page_id_;
+  page_id_t page_id_;
 };
 
 }  // namespace bustub
