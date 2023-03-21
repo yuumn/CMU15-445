@@ -39,7 +39,7 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::Init(page_id_t page_id, page_id_t parent_id
  */
 INDEX_TEMPLATE_ARGUMENTS
 auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::KeyAt(int index) const -> KeyType {
-  assert(index <= GetSize());
+  // assert(index <= GetSize());
   return array_[index].first;
 }
 
@@ -52,9 +52,6 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::SetKeyAt(int index, const KeyType &key) {
 INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_INTERNAL_PAGE_TYPE::SetValueAt(int index, const ValueType &value) {
   // assert(index<=GetSize());
-  if (index >= GetSize()) {
-    IncreaseSize(1);
-  }
   array_[index].second = value;
 }
 
@@ -64,7 +61,7 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::SetValueAt(int index, const ValueType &valu
  */
 INDEX_TEMPLATE_ARGUMENTS
 auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::ValueAt(int index) const -> page_id_t {
-  assert(index <= GetSize());
+  // assert(index <= GetSize());
   return array_[index].second;
 }
 
@@ -77,7 +74,7 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::Insert(KeyType key, ValueType value, KeyCom
     return;
   }
   int u = GetSize();
-  for (int i = 1; i < GetSize(); i++) {
+  for (int i = 0; i < GetSize(); i++) {
     int compare = comparator_(key, array_[i].first);
     if (compare == 1) {
       continue;
@@ -101,7 +98,7 @@ auto B_PLUS_TREE_INTERNAL_PAGE_TYPE::GetArrayAdd() -> MappingType * { return arr
 INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_INTERNAL_PAGE_TYPE::Copy(MappingType *array, int base, int len) {
   for (int i = 0; i < len; i++) {
-    array_[i] = array[base + i + 1];
+    array_[i] = array[base + i];
   }
 }
 
@@ -156,6 +153,22 @@ void B_PLUS_TREE_INTERNAL_PAGE_TYPE::Remove(ValueType &value) {
     array_[i] = array_[i + 1];
   }
   IncreaseSize(-1);
+}
+
+INDEX_TEMPLATE_ARGUMENTS
+void B_PLUS_TREE_INTERNAL_PAGE_TYPE::InsertNodeAfter(ValueType old_value, KeyType key, ValueType new_value) {
+  int u = 0;
+  for (int i = 0; i < GetSize(); i++) {
+    if (array_[i].second == old_value) {
+      u = i + 1;
+      break;
+    }
+  }
+  for (int i = GetSize(); i > u; i--) {
+    array_[i] = array_[i - 1];
+  }
+  array_[u] = {key, new_value};
+  IncreaseSize(1);
 }
 
 INDEX_TEMPLATE_ARGUMENTS

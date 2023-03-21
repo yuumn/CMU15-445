@@ -50,6 +50,7 @@ class BPlusTreeInternalPage : public BPlusTreePage {
   auto GetValueRight(ValueType value_now, ValueType &value) -> bool;
   void SetKeyByValue(KeyType key, ValueType value);
   void Remove(ValueType &value);
+  void InsertNodeAfter(ValueType old_value, KeyType key, ValueType new_value);
 
  private:
   // Flexible array member for page data.

@@ -56,7 +56,9 @@ class BPlusTreeLeafPage : public BPlusTreePage {
   auto GetArrayAdd() -> MappingType *;
   void Remove(KeyType key, KeyComparator &comparator_);
   void Print();
-
+  auto GetIndexByKey(KeyType key, KeyComparator &comparator_) -> int;
+  auto GetArrayByIndex(int index) -> MappingType &;
+  // auto cmp(KeyType &key1,KeyType &key2) -> bool;
  private:
   page_id_t next_page_id_;
   // Flexible array member for page data.

@@ -84,6 +84,8 @@ class BPlusTree {
   // read data from file and remove one by one
   void RemoveFromFile(const std::string &file_name, Transaction *transaction = nullptr);
   void Print1(BufferPoolManager *bpm);
+  auto SplitLeaf(LeafPage *node) -> LeafPage *;
+  auto SplitInternal(InternalPage *node) -> InternalPage *;
 
  private:
   void UpdateRootPageId(int insert_record = 0);

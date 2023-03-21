@@ -67,6 +67,12 @@ auto B_PLUS_TREE_LEAF_PAGE_TYPE::GetValueByKey(KeyType key, ValueType &value, Ke
   if (len == 0) {
     return false;
   }
+  // int index=std::lower_bound(array_,array_+len,key,comparator_);
+  // if(comparator_(key,array_[index].first)==0){
+  //   value=array_[index].second;
+  //   return true;
+  // }
+  // return false;
   for (int i = 0; i < len; i++) {
     int compare = comparator_(key, array_[i].first);
     if (compare == 1) {
@@ -121,7 +127,7 @@ auto B_PLUS_TREE_LEAF_PAGE_TYPE::Insert(KeyType key, ValueType value, KeyCompara
   }
   array_[u] = {key, value};
   IncreaseSize(1);
-  IsSplit = GetSize() > GetMaxSize() - 1;
+  IsSplit = GetSize() >= GetMaxSize();
   return true;
 }
 
@@ -142,6 +148,18 @@ void B_PLUS_TREE_LEAF_PAGE_TYPE::Remove(KeyType key, KeyComparator &comparator_)
   }
   IncreaseSize(-1);
 }
+INDEX_TEMPLATE_ARGUMENTS
+auto B_PLUS_TREE_LEAF_PAGE_TYPE::GetIndexByKey(KeyType key, KeyComparator &comparator_) -> int {
+  for (int i = 0; i < GetSize(); i++) {
+    if (comparator_(key, array_[i].first) == 0) {
+      return i;
+    }
+  }
+  return -1;
+}
+
+INDEX_TEMPLATE_ARGUMENTS
+auto B_PLUS_TREE_LEAF_PAGE_TYPE::GetArrayByIndex(int index) -> MappingType & { return array_[index]; }
 
 INDEX_TEMPLATE_ARGUMENTS
 void B_PLUS_TREE_LEAF_PAGE_TYPE::Print() {
