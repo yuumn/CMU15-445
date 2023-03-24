@@ -66,8 +66,6 @@ class BPlusTreeLeafPage : public BPlusTreePage {
   auto GetValueByKey(KeyType key, ValueType &value, KeyComparator &comparator_) -> bool;
   auto GetIndexByKey(KeyType key, KeyComparator &comparator_) -> int;
   auto GetItem(int index) -> const MappingType &;
-  auto Lookup(const KeyType &key, ValueType *value, const KeyComparator &keyComparator) const -> bool;
-  auto KeyIndex(const KeyType &key, const KeyComparator &keyComparator) const -> int;
 
  private:
   page_id_t next_page_id_;

@@ -79,7 +79,7 @@ class BPlusTree {
   void RemoveFromFile(const std::string &file_name, Transaction *transaction = nullptr);
 
   void ReleaseLatch(Transaction *transaction);
-
+  auto OptimisticPessimisticLock(const KeyType &key, int type, Transaction *transaction) -> Page *;
   auto GetLeafPageByKey(const KeyType &key, int type, Transaction *transaction) -> Page *;
   auto GetNewRootPage() -> InternalPage *;
   auto GetNewInternalPage(page_id_t parent_id) -> InternalPage *;
@@ -105,29 +105,6 @@ class BPlusTree {
   void ToGraph(BPlusTreePage *page, BufferPoolManager *bpm, std::ofstream &out) const;
 
   void ToString(BPlusTreePage *page, BufferPoolManager *bpm) const;
-
-  void StartNewTree(const KeyType &key, const ValueType &value);
-
-  auto InsertIntoLeaf(const KeyType &key, const ValueType &value, Transaction *transaction = nullptr) -> bool;
-
-  void InsertIntoParent(BPlusTreePage *old_node, const KeyType &key, BPlusTreePage *new_node,
-                        Transaction *transaction = nullptr);
-
-  template <typename N>
-  auto Split(N *node) -> N *;
-
-  template <typename N>
-  auto CoalesceOrRedistribute(N *node, Transaction *transaction = nullptr) -> bool;
-
-  template <typename N>
-  auto Coalesce(N *neighbor_node, N *node, BPlusTreeInternalPage<KeyType, page_id_t, KeyComparator> *parent, int index,
-                Transaction *transaction = nullptr) -> bool;
-
-  template <typename N>
-  void Redistribute(N *neighbor_node, N *node, BPlusTreeInternalPage<KeyType, page_id_t, KeyComparator> *parent,
-                    int index, bool from_prev);
-
-  auto AdjustRoot(BPlusTreePage *node) -> bool;
 
   // member variable
   std::string index_name_;
