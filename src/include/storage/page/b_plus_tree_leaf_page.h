@@ -41,6 +41,8 @@ namespace bustub {
  */
 INDEX_TEMPLATE_ARGUMENTS
 class BPlusTreeLeafPage : public BPlusTreePage {
+  using LeafPage = BPlusTreeLeafPage<KeyType, ValueType, KeyComparator>;
+
  public:
   // After creating a new leaf page from buffer pool, must call initialize
   // method to set default values
@@ -50,15 +52,23 @@ class BPlusTreeLeafPage : public BPlusTreePage {
   void SetNextPageId(page_id_t next_page_id);
   auto KeyAt(int index) const -> KeyType;
   auto ValueAt(int index) const -> ValueType;
-  auto GetValueByKey(KeyType key, ValueType &value, KeyComparator &comparator_) -> bool;
+
   auto Insert(KeyType key, ValueType value, KeyComparator &comparator_, bool &IsSplit) -> bool;
   void Copy(MappingType *array, int base, int len);
   auto GetArrayAdd() -> MappingType *;
-  void Remove(KeyType key, KeyComparator &comparator_);
+  auto Remove(KeyType key, KeyComparator &comparator_) -> bool;
   void Print();
-  auto GetIndexByKey(KeyType key, KeyComparator &comparator_) -> int;
   auto GetArrayByIndex(int index) -> MappingType &;
-  // auto cmp(KeyType &key1,KeyType &key2) -> bool;
+  void MoveAllFrom(BPlusTreeLeafPage *node_right);
+  auto GetKeyAtIndex(KeyType key, KeyComparator &comparator_) -> int;
+  void MoveLastTo(LeafPage *node_right);
+  void MoveFirstTo(LeafPage *node_left);
+  auto GetValueByKey(KeyType key, ValueType &value, KeyComparator &comparator_) -> bool;
+  auto GetIndexByKey(KeyType key, KeyComparator &comparator_) -> int;
+  auto GetItem(int index) -> const MappingType &;
+  auto Lookup(const KeyType &key, ValueType *value, const KeyComparator &keyComparator) const -> bool;
+  auto KeyIndex(const KeyType &key, const KeyComparator &keyComparator) const -> int;
+
  private:
   page_id_t next_page_id_;
   // Flexible array member for page data.

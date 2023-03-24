@@ -34,23 +34,25 @@ namespace bustub {
  */
 INDEX_TEMPLATE_ARGUMENTS
 class BPlusTreeInternalPage : public BPlusTreePage {
+  using InternalPage = BPlusTreeInternalPage<KeyType, page_id_t, KeyComparator>;
+
  public:
   // must call initialize method after "create" a new node
   void Init(page_id_t page_id, page_id_t parent_id = INVALID_PAGE_ID, int max_size = INTERNAL_PAGE_SIZE);
 
   auto KeyAt(int index) const -> KeyType;
   void SetKeyAt(int index, const KeyType &key);
+  auto ValueAt(int index) const -> ValueType;
   void SetValueAt(int index, const ValueType &value);
-  auto ValueAt(int index) const -> page_id_t;
-  void Insert(KeyType key, ValueType value, KeyComparator &comparator_);
+  auto ValueIndex(const ValueType &value) const -> int;
   auto GetArrayAdd() -> MappingType *;
-  void Copy(MappingType *array, int base, int len);
   void Print();
-  auto GetValueLeft(ValueType value_now, ValueType &value) -> bool;
-  auto GetValueRight(ValueType value_now, ValueType &value) -> bool;
-  void SetKeyByValue(KeyType key, ValueType value);
-  void Remove(ValueType &value);
+  void MoveAllToLeft(InternalPage *node_left, KeyType key, BufferPoolManager *buffer_pool_manager);
   void InsertNodeAfter(ValueType old_value, KeyType key, ValueType new_value);
+  void Remove(int index);
+  void Copy(MappingType *array, int base, int len);
+  void MoveLastTo(InternalPage *node_right, KeyType key, BufferPoolManager *buffer_pool_manager);
+  void MoveFirstTo(InternalPage *node_left, KeyType key, BufferPoolManager *buffer_pool_manager);
 
  private:
   // Flexible array member for page data.
