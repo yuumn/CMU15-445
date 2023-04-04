@@ -10,7 +10,7 @@
 #include "common/config.h"
 #include "concurrency/transaction_manager.h"
 #include "gtest/gtest.h"
-
+#define d(x) std::cout << x << "-------" << '\n';
 namespace bustub {
 
 /*
@@ -64,7 +64,7 @@ void TableLockTest1() {
 
   std::vector<table_oid_t> oids;
   std::vector<Transaction *> txns;
-
+  // d(1);
   /** 10 tables */
   int num_oids = 10;
   for (int i = 0; i < num_oids; i++) {
@@ -73,17 +73,21 @@ void TableLockTest1() {
     txns.push_back(txn_mgr.Begin());
     EXPECT_EQ(i, txns[i]->GetTransactionId());
   }
-
+  // d(2);
   /** Each transaction takes an S lock on every table and then unlocks */
   auto task = [&](int txn_id) {
     bool res;
     for (const table_oid_t &oid : oids) {
+      // d(7);
       res = lock_mgr.LockTable(txns[txn_id], LockManager::LockMode::EXCLUSIVE, oid);
       EXPECT_TRUE(res);
       CheckGrowing(txns[txn_id]);
     }
+    // d(6);
     for (const table_oid_t &oid : oids) {
+      // d(9);
       res = lock_mgr.UnlockTable(txns[txn_id], oid);
+      // d(8);
       EXPECT_TRUE(res);
       CheckShrinking(txns[txn_id]);
     }
@@ -93,23 +97,23 @@ void TableLockTest1() {
     /** All locks should be dropped */
     CheckTableLockSizes(txns[txn_id], 0, 0, 0, 0, 0);
   };
-
+  // d(3);
   std::vector<std::thread> threads;
   threads.reserve(num_oids);
 
   for (int i = 0; i < num_oids; i++) {
     threads.emplace_back(std::thread{task, i});
   }
-
+  // d(4);
   for (int i = 0; i < num_oids; i++) {
     threads[i].join();
   }
-
+  // d(5);
   for (int i = 0; i < num_oids; i++) {
     delete txns[i];
   }
 }
-TEST(LockManagerTest, DISABLED_TableLockTest1) { TableLockTest1(); }  // NOLINT
+TEST(LockManagerTest, TableLockTest1) { TableLockTest1(); }  // NOLINT
 
 /** Upgrading single transaction from S -> X */
 void TableLockUpgradeTest1() {
@@ -134,7 +138,7 @@ void TableLockUpgradeTest1() {
 
   delete txn1;
 }
-TEST(LockManagerTest, DISABLED_TableLockUpgradeTest1) { TableLockUpgradeTest1(); }  // NOLINT
+TEST(LockManagerTest, TableLockUpgradeTest1) { TableLockUpgradeTest1(); }  // NOLINT
 
 void RowLockTest1() {
   LockManager lock_mgr{};
@@ -190,7 +194,7 @@ void RowLockTest1() {
     delete txns[i];
   }
 }
-TEST(LockManagerTest, DISABLED_RowLockTest1) { RowLockTest1(); }  // NOLINT
+TEST(LockManagerTest, RowLockTest1) { RowLockTest1(); }  // NOLINT
 
 void TwoPLTest1() {
   LockManager lock_mgr{};
@@ -239,6 +243,6 @@ void TwoPLTest1() {
   delete txn;
 }
 
-TEST(LockManagerTest, DISABLED_TwoPLTest1) { TwoPLTest1(); }  // NOLINT
+TEST(LockManagerTest, TwoPLTest1) { TwoPLTest1(); }  // NOLINT
 
 }  // namespace bustub

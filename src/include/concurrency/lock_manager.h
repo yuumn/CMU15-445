@@ -17,6 +17,7 @@
 #include <list>
 #include <memory>
 #include <mutex>  // NOLINT
+#include <set>
 #include <unordered_map>
 #include <unordered_set>
 #include <utility>
@@ -64,7 +65,7 @@ class LockManager {
   class LockRequestQueue {
    public:
     /** List of lock requests for the same resource (table or row) */
-    std::list<LockRequest *> request_queue_;
+    std::list<std::shared_ptr<LockRequest>> request_queue_;
     /** For notifying blocked transactions on this rid */
     std::condition_variable cv_;
     /** txn_id of an upgrading transaction (if any) */
@@ -219,6 +220,12 @@ class LockManager {
    */
   auto LockTable(Transaction *txn, LockMode lock_mode, const table_oid_t &oid) noexcept(false) -> bool;
 
+  void DeleteTableLockSet(Transaction *txn, const std::shared_ptr<LockRequest> &lock_request);
+  void InsertTableLockSet(Transaction *txn, const std::shared_ptr<LockRequest> &lock_request);
+  auto GrantLock(const std::shared_ptr<LockRequest> &lock_request,
+                 const std::shared_ptr<LockRequestQueue> &lock_request_queue) -> bool;
+  void DeleteRowLockSet(Transaction *txn, const std::shared_ptr<LockRequest> &lock_request);
+  void InsertRowLockSet(Transaction *txn, const std::shared_ptr<LockRequest> &lock_request);
   /**
    * Release the lock held on a table by the transaction.
    *
@@ -296,6 +303,8 @@ class LockManager {
    * Runs cycle detection in the background.
    */
   auto RunCycleDetection() -> void;
+  auto Dfs(txn_id_t txn_id) -> bool;
+  void DeleteTxn(txn_id_t txn_id);
 
  private:
   /** Fall 2022 */
@@ -314,6 +323,13 @@ class LockManager {
   /** Waits-for graph representation. */
   std::unordered_map<txn_id_t, std::vector<txn_id_t>> waits_for_;
   std::mutex waits_for_latch_;
+
+  std::set<txn_id_t> safe_set_;
+  std::set<txn_id_t> txn_set_;
+  std::unordered_set<txn_id_t> active_set_;
+
+  std::unordered_map<txn_id_t, RID> map_txn_rid_;
+  std::unordered_map<txn_id_t, table_oid_t> map_txn_oid_;
 };
 
 }  // namespace bustub
